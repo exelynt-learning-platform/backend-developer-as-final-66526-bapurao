@@ -58,15 +58,9 @@ Open `http://localhost:8080/swagger-ui.html` and use **Authorize** with `Bearer 
 
 Reservation listing supports `status`, `minPrice`, `maxPrice`, `page`, `size`, and Spring Data `sort`, e.g. `/reservations?status=CONFIRMED&minPrice=100&maxPrice=1000&page=0&size=10&sort=price,desc`.
 
-## Example login
-```json
-{"username":"user","password":"user123"}
-```
 
-## Example reservation
-```json
-{"resourceId":1,"startTime":"2026-09-01T10:00:00","endTime":"2026-09-01T12:00:00"}
-```
+
+
 
 ## Reservation rules
 - `startTime < endTime` and start must not be in the past.
@@ -76,10 +70,7 @@ Reservation listing supports `status`, `minPrice`, `maxPrice`, `page`, `size`, a
 - Price is copied from the resource using `BigDecimal`; clients cannot set the price.
 - New reservations are `CONFIRMED`.
 
-## Error format
-```json
-{"timestamp":"2026-08-27T10:30:00","status":409,"error":"Conflict","message":"Resource is already reserved for the requested time period","path":"/reservations"}
-```
+
 
 ## Tests
 Run `mvn clean test`. The suite should cover authentication, RBAC, reservation ownership, validation, filtering, pagination, sorting and conflict detection as the implementation evolves.
