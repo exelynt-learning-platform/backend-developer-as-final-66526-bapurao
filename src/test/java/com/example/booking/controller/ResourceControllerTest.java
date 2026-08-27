@@ -2,14 +2,14 @@ package com.example.booking.controller;
 
 import com.example.booking.dto.resource.ResourceResponse;
 import com.example.booking.entity.ResourceType;
-import com.example.booking.service.ResourceService;
+import com.example.booking.exception.GlobalExceptionHandler;
 import com.example.booking.security.JwtAuthenticationFilter;
+import com.example.booking.service.ResourceService;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,16 +21,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ResourceController.class)
-@Import(TestSecurityConfig.class)
+@Import({
+        TestSecurityConfig.class,
+        GlobalExceptionHandler.class
+})
 class ResourceControllerTest {
-
     @Autowired
     MockMvc mvc;
+    
+
 
     @MockitoBean
     ResourceService service;
+
+    @MockitoBean
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     @WithMockUser(roles = "USER")
