@@ -1,0 +1,3 @@
+package com.example.booking.security;
+import org.junit.jupiter.api.*; import org.springframework.security.core.userdetails.User; import org.springframework.security.core.userdetails.UserDetails; import java.util.List; import static org.junit.jupiter.api.Assertions.*;
+class JwtServiceTest { @Test void tokenContainsAndValidatesSubject(){JwtService jwt=new JwtService("01234567890123456789012345678901",3600000);UserDetails u=User.withUsername("alice").password("x").roles("USER").build();String token=jwt.generateToken(u);assertEquals("alice",jwt.extractUsername(token));assertTrue(jwt.isValid(token,u));} @Test void weakSecretRejected(){assertThrows(IllegalArgumentException.class,()->new JwtService("short",1000));} }

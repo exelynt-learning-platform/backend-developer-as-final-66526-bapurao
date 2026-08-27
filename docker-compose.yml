@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/booking_db
+      DB_USERNAME: booking
+      DB_PASSWORD: booking
+      JWT_SECRET: replace-this-with-a-long-random-development-secret-123456789
+      JWT_EXPIRATION: 3600000
+      DDL_AUTO: update
+    ports:
+      - "8080:8080"
