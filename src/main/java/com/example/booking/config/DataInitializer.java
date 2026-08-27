@@ -25,11 +25,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DataInitializer {
 
-    @Value("${app.seed.admin-password}")
-    private String adminPassword;
+	@Value("${app.seed.admin-password}")
+	private String adminPassword;
 
-    @Value("${app.seed.user-password}")
-    private String userPassword;
+	@Value("${app.seed.user-password}")
+	private String userPassword;
 
     @Bean
     CommandLineRunner seed(
