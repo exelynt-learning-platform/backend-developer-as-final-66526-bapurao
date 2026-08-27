@@ -33,11 +33,6 @@ mvn clean test
 mvn spring-boot:run
 ```
 
-## Test credentials
-Development seed data (not production credentials):
-- ADMIN: `admin / admin123`
-- USER: `user / user123`
-
 Passwords are persisted as BCrypt hashes.
 
 ## Swagger
