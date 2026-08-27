@@ -1,9 +1,109 @@
 package com.example.booking.controller;
 
-import com.example.booking.dto.resource.*; import com.example.booking.entity.ResourceType; import com.example.booking.service.ResourceService; import org.junit.jupiter.api.Test; import org.springframework.beans.factory.annotation.Autowired; import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest; import org.springframework.boot.test.mock.mockito.MockBean; import org.springframework.security.test.context.support.WithMockUser; import org.springframework.test.web.servlet.MockMvc; import java.math.BigDecimal; import static org.mockito.ArgumentMatchers.any; import static org.mockito.Mockito.*; import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.example.booking.dto.resource.ResourceResponse;
+import com.example.booking.entity.ResourceType;
+import com.example.booking.service.ResourceService;
+import com.example.booking.security.JwtAuthenticationFilter;
+
+import org.junit.jupiter.api.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(ResourceController.class)
-class ResourceControllerTest { @Autowired MockMvc mvc; @MockBean ResourceService service;
- @Test @WithMockUser(roles="USER") void userCannotCreateResource() throws Exception {mvc.perform(post("/resources").contentType("application/json").content("{\"name\":\"Room\",\"type\":\"ROOM\",\"price\":\"100\",\"available\":true}" )).andExpect(status().isForbidden());verify(service,never()).create(any());}
- @Test @WithMockUser(roles="ADMIN") void adminCanCreateResource() throws Exception {when(service.create(any())).thenReturn(new ResourceResponse(1L,"Room",null,ResourceType.ROOM,new BigDecimal("100"),true));mvc.perform(post("/resources").contentType("application/json").content("{\"name\":\"Room\",\"type\":\"ROOM\",\"price\":\"100\",\"available\":true}" )).andExpect(status().isCreated());verify(service).create(any());}
- @Test @WithMockUser(roles="ADMIN") void negativePriceIsRejected() throws Exception {mvc.perform(post("/resources").contentType("application/json").content("{\"name\":\"Room\",\"type\":\"ROOM\",\"price\":\"-1\",\"available\":true}" )).andExpect(status().isBadRequest());verify(service,never()).create(any());}
+@Import(TestSecurityConfig.class)
+class ResourceControllerTest {
+
+    @Autowired
+    MockMvc mvc;
+
+    @MockitoBean
+    ResourceService service;
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void userCannotCreateResource() throws Exception {
+
+        mvc.perform(
+                post("/resources")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                    "name": "Room",
+                                    "type": "ROOM",
+                                    "price": "100",
+                                    "available": true
+                                }
+                                """)
+        )
+        .andExpect(status().isForbidden());
+
+        verify(service, never()).create(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminCanCreateResource() throws Exception {
+
+        when(service.create(any()))
+                .thenReturn(
+                        new ResourceResponse(
+                                1L,
+                                "Room",
+                                null,
+                                ResourceType.ROOM,
+                                new BigDecimal("100"),
+                                true
+                        )
+                );
+
+        mvc.perform(
+                post("/resources")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                    "name": "Room",
+                                    "type": "ROOM",
+                                    "price": "100",
+                                    "available": true
+                                }
+                                """)
+        )
+        .andExpect(status().isCreated());
+
+        verify(service).create(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void negativePriceIsRejected() throws Exception {
+
+        mvc.perform(
+                post("/resources")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                    "name": "Room",
+                                    "type": "ROOM",
+                                    "price": "-1",
+                                    "available": true
+                                }
+                                """)
+        )
+        .andExpect(status().isBadRequest());
+
+        verify(service, never()).create(any());
+    }
 }

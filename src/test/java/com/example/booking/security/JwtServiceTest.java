@@ -1,3 +1,64 @@
 package com.example.booking.security;
-import org.junit.jupiter.api.*; import org.springframework.security.core.userdetails.User; import org.springframework.security.core.userdetails.UserDetails; import java.util.List; import static org.junit.jupiter.api.Assertions.*;
-class JwtServiceTest { @Test void tokenContainsAndValidatesSubject(){JwtService jwt=new JwtService("01234567890123456789012345678901",3600000);UserDetails u=User.withUsername("alice").password("x").roles("USER").build();String token=jwt.generateToken(u);assertEquals("alice",jwt.extractUsername(token));assertTrue(jwt.isValid(token,u));} @Test void weakSecretRejected(){assertThrows(IllegalArgumentException.class,()->new JwtService("short",1000));} }
+
+import org.junit.jupiter.api.Test;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class JwtServiceTest {
+
+    private String generateTestSecret() {
+
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    @Test
+    void tokenContainsAndValidatesSubject() {
+
+        String testSecret = generateTestSecret();
+
+        JwtService jwt = new JwtService(
+                testSecret,
+                3600000
+        );
+
+        UserDetails user = User
+                .withUsername("alice")
+                .password("x")
+                .roles("USER")
+                .build();
+
+        String token = jwt.generateToken(user);
+
+        assertEquals(
+                "alice",
+                jwt.extractUsername(token)
+        );
+
+        assertTrue(
+                jwt.isTokenValid(
+                        token,
+                        user.getUsername()
+                )
+        );
+    }
+
+    @Test
+    void weakSecretRejected() {
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new JwtService(
+                        "short",
+                        1000
+                )
+        );
+    }
+}
