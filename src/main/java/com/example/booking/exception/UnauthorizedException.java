@@ -1,2 +1,7 @@
 package com.example.booking.exception;
-public class UnauthorizedException extends RuntimeException { public UnauthorizedException(String message){super(message);} }
+
+public class UnauthorizedException extends RuntimeException {
+	public UnauthorizedException(String message) {
+		super(message);
+	}
+}

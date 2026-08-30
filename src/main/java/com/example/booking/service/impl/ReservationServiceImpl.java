@@ -52,7 +52,7 @@ public class ReservationServiceImpl implements ReservationService {
 				.toResponse(reservations.save(Reservation.builder().user(u).resource(x).startTime(r.startTime())
 						.endTime(r.endTime()).price(x.getPrice()).status(ReservationStatus.CONFIRMED).build()));
 	}
-	
+
 	@Transactional(readOnly = true)
 	public Page<ReservationResponse> list(String username, boolean admin, ReservationStatus status, BigDecimal min,
 			BigDecimal max, Pageable p) {
@@ -78,7 +78,7 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new UnauthorizedException("You do not have access to this reservation");
 		return r;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public ReservationResponse get(Long id, String username, boolean admin) {
 		return ReservationMapper.toResponse(owned(id, username, admin));

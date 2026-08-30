@@ -1,2 +1,4 @@
 package com.example.booking.dto.auth;
-public record LoginResponse(String token,String tokenType,long expiresIn) {}
+
+public record LoginResponse(String token, String tokenType, long expiresIn) {
+}

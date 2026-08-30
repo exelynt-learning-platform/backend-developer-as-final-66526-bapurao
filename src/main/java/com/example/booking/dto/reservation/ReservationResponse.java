@@ -1,4 +1,9 @@
 package com.example.booking.dto.reservation;
+
 import com.example.booking.entity.ReservationStatus;
-import java.math.BigDecimal; import java.time.LocalDateTime;
-public record ReservationResponse(Long id,Long resourceId,String resourceName,Long userId,String username,LocalDateTime startTime,LocalDateTime endTime,BigDecimal price,ReservationStatus status) {}
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public record ReservationResponse(Long id, Long resourceId, String resourceName, Long userId, String username,
+		LocalDateTime startTime, LocalDateTime endTime, BigDecimal price, ReservationStatus status) {
+}
