@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -23,11 +24,13 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
+    // Password encryption
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Authentication manager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
@@ -35,15 +38,17 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    // Security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
 
         http
-            // JWT authentication does not use sessions or CSRF
+
+            // REST API does not use CSRF protection
             .csrf(csrf -> csrf.disable())
 
-            // Stateless API
+            // JWT authentication is stateless
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
                     SessionCreationPolicy.STATELESS
@@ -53,27 +58,82 @@ public class SecurityConfig {
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
 
-                // Public endpoints
+                // =========================================
+                // PUBLIC ENDPOINTS
+                // =========================================
+
+                // Login does not require JWT
                 .requestMatchers(
-                    "/auth/login",
+                    "/auth/login"
+                ).permitAll()
+
+                // Swagger/OpenAPI does not require JWT
+                .requestMatchers(
                     "/swagger-ui/**",
+                    "/swagger-ui.html",
                     "/v3/api-docs/**"
                 ).permitAll()
 
-                // Resources - USER and ADMIN
-                .requestMatchers("/resources/**")
-                .hasAnyRole("USER", "ADMIN")
 
-                // Reservations - USER and ADMIN
-                .requestMatchers("/reservations/**")
-                .hasAnyRole("USER", "ADMIN")
+                // =========================================
+                // RESOURCE ENDPOINTS
+                // =========================================
 
-                // Everything else requires authentication
-                .anyRequest()
-                .authenticated()
+                // USER + ADMIN can READ resources
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/resources/**"
+                ).hasAnyRole("USER", "ADMIN")
+
+                // Only ADMIN can CREATE resources
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/resources/**"
+                ).hasRole("ADMIN")
+
+                // Only ADMIN can UPDATE resources
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/resources/**"
+                ).hasRole("ADMIN")
+
+                // Only ADMIN can PARTIALLY UPDATE resources
+                .requestMatchers(
+                    HttpMethod.PATCH,
+                    "/resources/**"
+                ).hasRole("ADMIN")
+
+                // Only ADMIN can DELETE resources
+                .requestMatchers(
+                    HttpMethod.DELETE,
+                    "/resources/**"
+                ).hasRole("ADMIN")
+
+
+                // =========================================
+                // RESERVATION ENDPOINTS
+                // =========================================
+
+                // USER + ADMIN can access reservations
+                .requestMatchers(
+                    "/reservations/**"
+                ).hasAnyRole("USER", "ADMIN")
+
+
+                // =========================================
+                // EVERYTHING ELSE
+                // =========================================
+
+                // Any other endpoint requires authentication
+                .anyRequest().authenticated()
             )
 
-            // JWT filter runs before Spring's username/password filter
+            // =========================================
+            // JWT FILTER
+            // =========================================
+
+            // JWT filter executes before Spring's
+            // UsernamePasswordAuthenticationFilter
             .addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class
